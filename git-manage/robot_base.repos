@@ -1,0 +1,5 @@
+repositories:
+  robot_base:
+    type: git
+    url: git@github.com:Advantech-AMR/robot_base.git
+    version: master

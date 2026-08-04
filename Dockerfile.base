@@ -1,0 +1,66 @@
+ARG BASE_IMAGE=nvcr.io/nvidia/isaac/ros:isaac_ros_28556f8bc78a98822bd08b2d7c6fcf9b-arm64-jetpack
+FROM ${BASE_IMAGE}
+
+WORKDIR /workspace
+
+# ========================================================================
+# ros2 env to bashrc
+RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+RUN echo "if [ -f /workspace/install/setup.bash ]; then source /workspace/install/setup.bash; fi" >> ~/.bashrc
+
+RUN /bin/bash -c "source /opt/ros/jazzy/setup.bash"
+
+# Install tool and dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    ros-jazzy-rviz2 \
+    git \
+    build-essential \
+    cmake \
+    python3-colcon-common-extensions \
+    python3-rosdep \
+    python3-serial \
+    python3-matplotlib \
+    python3-tornado \
+    python3-pillow \
+    ros-jazzy-teleop-twist-keyboard
+
+# Install Nav2, Slam dependencies
+RUN apt-get install -y \
+    ros-jazzy-nav2-bringup \
+    libboost-all-dev \
+    ros-jazzy-nav2-msgs \
+    ros-jazzy-ackermann-msgs \
+    ros-jazzy-slam-toolbox
+
+# Install ZED components dependencies
+RUN apt-get install -y \
+    libblas-dev \
+    libusb-1.0-0-dev \
+    libturbojpeg0-dev \
+    libgles2 \
+    ros-jazzy-ament-cmake-clang-format \
+    ros-jazzy-zed-description \
+    ros-jazzy-grid-map-rviz-plugin \
+    ros-jazzy-image-transport-plugins \
+    ros-jazzy-compressed-image-transport \
+    ros-jazzy-compressed-depth-image-transport \
+    ros-jazzy-theora-image-transport \
+    ros-jazzy-nmea-msgs \
+    ros-jazzy-depthimage-to-laserscan \
+    ros-jazzy-point-cloud-interfaces
+
+# Install Isaac ROS related packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-jazzy-isaac-ros-common \
+    ros-jazzy-isaac-ros-examples \
+    v4l-utils \
+    ros-jazzy-v4l2-camera \
+    ros-jazzy-isaac-ros-apriltag \
+    ros-jazzy-isaac-ros-apriltag-interfaces
+
+# ========================================================================
+
+WORKDIR /workspace
+
+CMD ["/bin/bash"]

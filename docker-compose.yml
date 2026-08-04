@@ -1,0 +1,142 @@
+version: '3.8'
+
+services:
+  # 核心服務：實體車與模擬器都需要的（Agent / Navigation）
+  robot_base:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    image: robot_base_img:latest
+    network_mode: "host"
+    privileged: true
+    ipc: "host"
+    pid: "host"
+    runtime: nvidia
+    tty: true
+    stdin_open: true
+    # command: bash -c "source /opt/ros/jazzy/setup.bash && source /workspace/install/setup.bash && ros2 launch wheeltec_launch slam_with_navigation.launch.py"
+    environment:
+      - USER=ubuntu
+      - DISPLAY=:0
+      - ROS_DOMAIN_ID=36
+      - ISAAC_ROS_WS=/workspace
+    volumes:
+      - /home/ubuntu/workspaces/main/robot_base:/workspace
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp:/tmp
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /dev/bus/usb:/dev/bus/usb
+      - /dev/playrobot_base:/dev/playrobot_base
+      - /dev/sllidar_a2m12:/dev/sllidar_a2m12
+
+  # 自訂套件服務
+  custom_packages:
+    image: robot_base_img:latest
+    depends_on:
+      - robot_base
+    network_mode: "host"
+    privileged: true
+    ipc: "host"
+    pid: "host"
+    runtime: nvidia
+    tty: true
+    stdin_open: true
+    # command: |
+    #   bash -c "
+    #   source /opt/ros/jazzy/setup.bash
+    #   source /workspace/install/setup.bash
+    #   ros2 launch auto_explorer auto_exploration.launch.py &
+
+    #   if [ \"$$ENABLE_WEB_CONTROLLER\" = \"true\" ]; then
+    #     echo 'Starting Web Controller...'
+    #     ros2 run wheeltec_web_teleop web_server &
+    #   fi
+
+    #   if [ \"$$ENABLE_CUSTOM_BOUNDARY\" = \"true\" ]; then
+    #     echo 'Starting Custom Boundary...'
+    #     ros2 run custom_boundary custom_boundary_node &
+    #   fi
+
+    #   if [ \"$$ENABLE_MAP_INTEGRATION\" = \"true\" ]; then
+    #     echo 'Starting Map Integration...'
+    #     ros2 run map_integration map_integration_node &
+    #   fi
+
+    #   wait
+    #   "
+    environment:
+      - ISAAC_ROS_PLATFORM=arm64-jetpack
+      - ISAAC_ROS_WS=/workspace
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - USER=ubuntu
+      - DISPLAY=:0
+      - ROS_DOMAIN_ID=36
+      - ENABLE_WEB_CONTROLLER=${ENABLE_WEB_CONTROLLER:-false}
+      - ENABLE_CUSTOM_BOUNDARY=${ENABLE_CUSTOM_BOUNDARY:-false}
+      - ENABLE_MAP_INTEGRATION=${ENABLE_MAP_INTEGRATION:-false}
+    volumes:
+      - /home/ubuntu/workspaces/main/custom_packages:/workspace
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp:/tmp
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /usr/bin/tegrastats:/usr/bin/tegrastats
+
+
+  # ZED 相機服務
+  zed_packages:
+    image: robot_base_img:latest
+    depends_on:
+      - robot_base
+    network_mode: "host"
+    privileged: true
+    ipc: "host"
+    pid: "host"
+    runtime: nvidia
+    tty: true
+    stdin_open: true
+    command: bash -c "sleep infinity"
+    environment:
+      - ISAAC_ROS_PLATFORM=arm64-jetpack
+      - ISAAC_ROS_WS=/workspace
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - LD_LIBRARY_PATH=/usr/local/zed/lib:/usr/local/cuda/lib64:/opt/ros/jazzy/share/gxf_isaac_optimizer/gxf/lib:/opt/ros/jazzy/opt/gz_math_vendor/lib
+      - USER=ubuntu
+      - DISPLAY=:0
+      - ROS_DOMAIN_ID=36
+    volumes:
+      - /home/ubuntu/workspaces/main/zed_packages:/workspace
+      - /etc/localtime:/etc/localtime:ro
+      - /tmp:/tmp
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /usr/bin/tegrastats:/usr/bin/tegrastats
+      - /sys/kernel/debug:/sys/kernel/debug
+      - /usr/lib/aarch64-linux-gnu/tegra:/usr/lib/aarch64-linux-gnu/tegra
+      - /usr/src/jetson_multimedia_api:/usr/src/jetson_multimedia_api
+      - /usr/src/jetson_sipl_api:/usr/src/jetson_sipl_api
+      - /usr/share/vpi3:/usr/share/vpi3
+      - /usr/local/zed:/usr/local/zed
+      - /usr/local/cuda:/usr/local/cuda
+      - /usr/local/cuda-13:/usr/local/cuda-13
+      - /usr/local/cuda-13.0:/usr/local/cuda-13.0
+      - /dev/input:/dev/input
+      - /dev/bus/usb:/dev/bus/usb
+      - /dev/video0:/dev/video0
+      - /dev/video1:/dev/video1
+      - /dev/media0:/dev/media0
+      - /dev/media1:/dev/media1
+
+
+  # 模擬器服務：加上 profiles 標籤
+  gazebo_sim:
+    profiles: ["sim"]  # <--- 只有在啟動時指定 sim profile 才會開啟
+    build:
+      context: .
+      dockerfile: Dockerfile.gazebo
+    network_mode: "host"
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - ROS_DOMAIN_ID=42
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw

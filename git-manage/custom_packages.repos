@@ -1,0 +1,9 @@
+repositories:
+  auto-explorer-packages:
+    type: git
+    url: git@github.com:Advantech-AMR/auto-explorer-packages.git
+    version: master
+  trajectory_tracker:
+    type: git
+    url: git@github.com:Advantech-AMR/trajectory_tracker.git
+    version: master
