@@ -22,6 +22,20 @@
 ### Docker Build
 * 在專案根目錄有 Dockerfile.base，這是底層鏡像，包含 ros2 jazzy 基礎、ZED ROS2 相關套件、其他 ROS2 套件等
 
+### 🛠️ 整合編譯腳本 (colcon build)
+我們提供了一個整合編譯腳本 **`scripts/ros_compile.bash`**，此腳本會自動**進入對應的 Docker Compose 容器內部**執行編譯與清理工作，從而避免主機權限不足的 Error，並確保擁有正確的 CUDA / ROS 2 編譯環境：
+* **工作原理**：
+  * 自動檢測核心容器是否處於運行狀態，若未啟動則會自動執行 `./scripts/docker_start.bash` 帶起服務。
+  * 透過 `docker compose exec` 進入 `robot_base`、`zed_packages`、`custom_packages` 對應容器內調用 `colcon build`。
+* **一般編譯**：
+  ```bash
+  ./scripts/ros_compile.bash
+  ```
+* **全新編譯（自動在容器內刪除舊有的 build/install/log）**：
+  ```bash
+  ./scripts/ros_compile.bash --clean
+  ```
+
 ## 資料夾內容
 * `robot_base/`: 包含 ros2 以及控制車輛的基礎套件，包含 Serial, Lidar, nav2, keyboard control, slam, rviz2 等基礎套件
 * `custom_packages/`: 包含自訂套件，包含 auto_explorer, custom_boundary, map_integration, wheeltec_web_teleop 等自訂套件
@@ -94,16 +108,21 @@ docker compose exec custom_packages bash -c "source /opt/ros/jazzy/setup.bash &&
 ---
 
 ## ⚡ 一鍵啟動 (Docker Compose 自動帶起)
-您可以在執行 `docker compose up -d` 時，透過**環境變數**直接控制是否開啟 `web controller`、`custom_boundary` 與 `map_integration`：
+我們提供了一個整合啟動腳本 **`scripts/docker_start.bash`**，它會自動讀取同目錄下的 `.env` 配置檔，並管理 Docker 容器的生命週期：
 
-* **1. 預設模式（僅開啟 SLAM+導航底層 與 純自動探索）**：
+* **1. 常用啟動選項**：
+  * **啟動核心服務**（根據 `.env` 中的模組啟用狀態）：
+    ```bash
+    ./scripts/docker_start.bash
+    ```
+  * **啟動模擬器模式**（帶起 Gazebo 模擬器與 sim Profile）：
+    ```bash
+    ./scripts/docker_start.bash --sim
+    ```
+
+* **2. 關閉服務**：
   ```bash
-  docker compose up -d
+  ./scripts/docker_start.bash --down
   ```
 
-* **2. 啟動自動探索 + 網頁控制器 (Web Controller)**：
-  ```bash
-  ENABLE_WEB_CONTROLLER=true docker compose up -d
-  ```
-
-* **提示**：可以新增 `.env` 檔案，將前面的啟動參數都寫在裡面。
+* **提示**：如果您想開啟或關閉 `Web 控制器`、`虛擬邊界` 或 `地圖整合` 等模組，請直接編輯根目錄下的 `.env` 檔案（例如修改 `ENABLE_WEB_CONTROLLER=true`），然後重新執行 `./scripts/docker_start.bash` 即可。
