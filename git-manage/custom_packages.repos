@@ -7,3 +7,7 @@ repositories:
     type: git
     url: git@github.com:Advantech-AMR/trajectory_tracker.git
     version: master
+  wheeltec_web_teleop:
+    type: git
+    url: git@github.com:Advantech-AMR/wheeltec_web_teleop.git
+    version: master
