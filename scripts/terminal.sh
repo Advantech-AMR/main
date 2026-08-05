@@ -1,0 +1,1 @@
+docker compose run --no-deps --rm zed_packages bash

@@ -142,6 +142,3 @@ docker compose exec custom_packages bash -c "source /opt/ros/jazzy/setup.bash &&
   ```
 
 * **提示**：如果您想開啟或關閉 `Web 控制器`、`虛擬邊界` 或 `地圖整合` 等模組，請直接編輯根目錄下的 `.env` 檔案（例如修改 `ENABLE_WEB_CONTROLLER=true`），然後重新執行 `./scripts/docker_start.bash` 即可。
-
-docker compose run --no-deps --rm zed_packages bash
-ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zedx

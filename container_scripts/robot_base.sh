@@ -8,27 +8,25 @@ if [ "$APP_MODE" = "free" ]; then
   echo "[robot_base] Starting Free Mode..."
 
   if [ "$SIMULATE_MODE" = "true" ]; then
-    if [ "$START_SIMULATION" = "true" ]; then
-      echo "[robot_base] Starting Virtual Mode (Gazebo) simulation in free mode..."
-      WORLD_SDF="/worlds/virtual/$WORLD_NAME/$WORLD_NAME.sdf"
-      if [ ! -f "$WORLD_SDF" ]; then
-        echo "Error: World SDF file $WORLD_SDF not found!"
-        exit 1
-      fi
-
-      if [ "$START_SLAM_TOOLBOX" = "true" ] && [ "$START_NAV2" = "true" ]; then
-        ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False world:=$WORLD_SDF slam:=False &
-        sleep 5
-        ros2 launch slam_toolbox online_async_launch.py &
-      elif [ "$START_SLAM_TOOLBOX" = "true" ]; then
-        ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False world:=$WORLD_SDF slam:=True &
-      elif [ "$START_NAV2" = "true" ]; then
-        ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False world:=$WORLD_SDF map:=$MAP_PATH slam:=False &
-      else
-        ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False world:=$WORLD_SDF slam:=False &
-      fi
-      HAS_PROCESS=true
+    echo "[robot_base] Starting Virtual Mode (Gazebo) simulation in free mode..."
+    WORLD_SDF="/worlds/virtual/$WORLD_NAME/$WORLD_NAME.sdf"
+    if [ ! -f "$WORLD_SDF" ]; then
+      echo "Error: World SDF file $WORLD_SDF not found!"
+      exit 1
     fi
+
+    if [ "$START_SLAM_TOOLBOX" = "true" ] && [ "$START_NAV2" = "true" ]; then
+      ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False world:=$WORLD_SDF slam:=False &
+      sleep 5
+      ros2 launch slam_toolbox online_async_launch.py &
+    elif [ "$START_SLAM_TOOLBOX" = "true" ]; then
+      ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False world:=$WORLD_SDF slam:=True &
+    elif [ "$START_NAV2" = "true" ]; then
+      ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False world:=$WORLD_SDF map:=$MAP_PATH slam:=False &
+    else
+      ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False world:=$WORLD_SDF slam:=False &
+    fi
+    HAS_PROCESS=true
 
   else
     echo "[robot_base] Starting Physical Mode nodes in free mode..."

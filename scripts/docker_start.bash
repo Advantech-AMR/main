@@ -83,7 +83,6 @@ if [ "$APP_MODE" = "free" ]; then
   echo "  [Free Mode Startup Options]:"
   echo "    START_BASE_CONTROL:   $START_BASE_CONTROL"
   echo "    START_LIDAR:          $START_LIDAR"
-  echo "    START_SIMULATION:     $START_SIMULATION"
   echo "    START_SLAM_TOOLBOX:   $START_SLAM_TOOLBOX"
   echo "    START_NAV2:           $START_NAV2"
   echo "    START_AUTO_EXPLORER:  $START_AUTO_EXPLORER"
