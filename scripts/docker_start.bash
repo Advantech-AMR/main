@@ -6,14 +6,14 @@
 # It reads active module configurations directly from the .env file.
 #
 # Usage:
-#   ./scripts/docker_start.bash          # Start core services
-#   ./scripts/docker_start.bash --sim    # Start simulation profile
+#   ./scripts/docker_start.bash          # Start services based on .env
+#   ./scripts/docker_start.bash --sim    # Force simulation mode
 #   ./scripts/docker_start.bash --down   # Stop all services
 # ==============================================================================
 
 set -e
 
-# Load .env file for display purposes if it exists
+# Load .env file if it exists
 if [ -f ".env" ]; then
   # Sourcing .env directly (ignoring comments)
   export $(grep -v '^#' .env | xargs)
@@ -24,7 +24,11 @@ export ENABLE_WEB_CONTROLLER=${ENABLE_WEB_CONTROLLER:-false}
 export ENABLE_CUSTOM_BOUNDARY=${ENABLE_CUSTOM_BOUNDARY:-false}
 export ENABLE_MAP_INTEGRATION=${ENABLE_MAP_INTEGRATION:-false}
 export SIMULATE_MODE=${SIMULATE_MODE:-false}
-export SIMULATE_WORLD_PATH=${SIMULATE_WORLD_PATH:-}
+export APP_MODE=${APP_MODE:-auto_explore}
+export WORLD_NAME=${WORLD_NAME:-my-nav-map}
+export MAP_PATH=${MAP_PATH:-/worlds/virtual/my-nav-map/maps/slam_map.yaml}
+export ZED_CAMERA_MODEL=${ZED_CAMERA_MODEL:-zed2i}
+export ENABLE_RVIZ=${ENABLE_RVIZ:-false}
 
 CMD="up"
 USE_SIM=false
@@ -57,21 +61,48 @@ if [ "$CMD" = "down" ]; then
   exit 0
 fi
 
-# Print active modules configuration
+# Force SIMULATE_MODE to true if USE_SIM flag was passed
+if [ "$USE_SIM" = true ]; then
+  export SIMULATE_MODE="true"
+fi
+
+# Print active configurations
 echo ">>> Launching AMR Docker environment..."
 echo "----------------------------------------"
-echo "  Web Controller:   $ENABLE_WEB_CONTROLLER"
-echo "  Custom Boundary:  $ENABLE_CUSTOM_BOUNDARY"
-echo "  Map Integration:  $ENABLE_MAP_INTEGRATION"
-echo "  Simulation (Gazebo): $USE_SIM"
+echo "  Run Mode (APP_MODE):    $APP_MODE"
+echo "  Simulation (Sim Mode):  $SIMULATE_MODE"
+if [ "$SIMULATE_MODE" = "true" ]; then
+  echo "  Virtual World:          $WORLD_NAME"
+fi
+echo "  Map Path:               $MAP_PATH"
+if [ "$APP_MODE" = "zed_detect" ] || [ "$APP_MODE" = "zed_mapping" ]; then
+  echo "  ZED Camera Model:       $ZED_CAMERA_MODEL"
+  echo "  Enable RViz2:           $ENABLE_RVIZ"
+fi
+if [ "$APP_MODE" = "free" ]; then
+  echo "  [Free Mode Startup Options]:"
+  echo "    START_BASE_CONTROL:   $START_BASE_CONTROL"
+  echo "    START_LIDAR:          $START_LIDAR"
+  echo "    START_SIMULATION:     $START_SIMULATION"
+  echo "    START_SLAM_TOOLBOX:   $START_SLAM_TOOLBOX"
+  echo "    START_NAV2:           $START_NAV2"
+  echo "    START_AUTO_EXPLORER:  $START_AUTO_EXPLORER"
+  echo "    START_ZED_CAMERA:     $START_ZED_CAMERA"
+  echo "    START_ZED_VISUALIZER: $START_ZED_VISUALIZER"
+  echo "    START_ZED_MAPPING:    $START_ZED_MAPPING"
+  echo "    ENABLE_RVIZ:          $ENABLE_RVIZ"
+fi
+echo "----------------------------------------"
+echo "  Web Controller:         $ENABLE_WEB_CONTROLLER"
+echo "  Custom Boundary:        $ENABLE_CUSTOM_BOUNDARY"
+echo "  Map Integration:        $ENABLE_MAP_INTEGRATION"
 echo "----------------------------------------"
 
 # Run docker compose
-if [ "$USE_SIM" = true ]; then
+if [ "$SIMULATE_MODE" = "true" ]; then
   echo "Starting services in Simulation mode (Gazebo)..."
-  export SIMULATE_MODE="true"
 else
-  echo "Starting core services (robot_base, custom_packages, zed_packages)..."
+  echo "Starting core services in Physical mode..."
 fi
 
 docker compose up -d

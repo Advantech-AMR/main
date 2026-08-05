@@ -14,32 +14,26 @@ services:
     runtime: nvidia
     tty: true
     stdin_open: true
-    command: |
-      bash -c "
-      source /opt/ros/jazzy/setup.bash
-      if [ -f /workspace/install/setup.bash ]; then source /workspace/install/setup.bash; fi
-      
-      if [ \"$$SIMULATE_MODE\" = \"true\" ]; then
-        echo 'Starting simulation mode in robot_base...'
-        ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False world:=/worlds/virtual/$$SIMULATE_WORLD_PATH/$$SIMULATE_WORLD_PATH.sdf &
-        sleep 5
-        ros2 launch slam_toolbox online_async_launch.py &
-      else
-        echo 'Starting physical mode in robot_base...'
-        ros2 launch wheeltec_launch slam_with_navigation.launch.py &
-      fi
-      wait
-      "
+    command: bash /scripts/robot_base.sh
     environment:
       - USER=ubuntu
       - DISPLAY=${DISPLAY:-:0}
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-36}
       - SIMULATE_MODE=${SIMULATE_MODE:-false}
-      - SIMULATE_WORLD_PATH=${SIMULATE_WORLD_PATH:-demo_room_2}
+      - APP_MODE=${APP_MODE:-auto_explore}
+      - WORLD_NAME=${WORLD_NAME:-my-nav-map}
+      - MAP_PATH=${MAP_PATH:-/worlds/virtual/my-nav-map/maps/slam_map.yaml}
+      - START_BASE_CONTROL=${START_BASE_CONTROL:-false}
+      - START_LIDAR=${START_LIDAR:-false}
+      - START_SIMULATION=${START_SIMULATION:-false}
+      - START_SLAM_TOOLBOX=${START_SLAM_TOOLBOX:-false}
+      - START_NAV2=${START_NAV2:-false}
+      - ENABLE_RVIZ=${ENABLE_RVIZ:-false}
       - ISAAC_ROS_WS=/workspace
     volumes:
       - /home/ubuntu/workspaces/main/robot_base:/workspace
       - /home/ubuntu/workspaces/main/worlds:/worlds
+      - /home/ubuntu/workspaces/main/container_scripts:/scripts
       - /etc/localtime:/etc/localtime:ro
       - /tmp:/tmp
       - /tmp/.X11-unix:/tmp/.X11-unix
@@ -59,35 +53,7 @@ services:
     runtime: nvidia
     tty: true
     stdin_open: true
-    command: |
-      bash -c "
-      source /opt/ros/jazzy/setup.bash
-      if [ -f /workspace/install/setup.bash ]; then source /workspace/install/setup.bash; fi
-      
-      USE_SIM_TIME_ARG=\"use_sim_time:=false\"
-      if [ \"$$SIMULATE_MODE\" = \"true\" ]; then
-        USE_SIM_TIME_ARG=\"use_sim_time:=true\"
-      fi
-      
-      ros2 launch auto_explorer auto_exploration.launch.py $$USE_SIM_TIME_ARG &
-
-      if [ \"$$ENABLE_WEB_CONTROLLER\" = \"true\" ]; then
-        echo 'Starting Web Controller...'
-        ros2 run wheeltec_web_teleop web_server &
-      fi
-
-      if [ \"$$ENABLE_CUSTOM_BOUNDARY\" = \"true\" ]; then
-        echo 'Starting Custom Boundary...'
-        ros2 run custom_boundary custom_boundary_node &
-      fi
-
-      if [ \"$$ENABLE_MAP_INTEGRATION\" = \"true\" ]; then
-        echo 'Starting Map Integration...'
-        ros2 run map_integration map_integration_node &
-      fi
-
-      wait
-      "
+    command: bash /scripts/custom_packages.sh
     environment:
       - ISAAC_ROS_PLATFORM=arm64-jetpack
       - ISAAC_ROS_WS=/workspace
@@ -97,18 +63,19 @@ services:
       - DISPLAY=${DISPLAY:-:0}
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-36}
       - SIMULATE_MODE=${SIMULATE_MODE:-false}
-      - SIMULATE_WORLD_PATH=${SIMULATE_WORLD_PATH:-demo_room_2}
+      - APP_MODE=${APP_MODE:-auto_explore}
       - ENABLE_WEB_CONTROLLER=${ENABLE_WEB_CONTROLLER:-false}
       - ENABLE_CUSTOM_BOUNDARY=${ENABLE_CUSTOM_BOUNDARY:-false}
       - ENABLE_MAP_INTEGRATION=${ENABLE_MAP_INTEGRATION:-false}
+      - START_AUTO_EXPLORER=${START_AUTO_EXPLORER:-false}
     volumes:
       - /home/ubuntu/workspaces/main/custom_packages:/workspace
       - /home/ubuntu/workspaces/main/worlds:/worlds
+      - /home/ubuntu/workspaces/main/container_scripts:/scripts
       - /etc/localtime:/etc/localtime:ro
       - /tmp:/tmp
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /usr/bin/tegrastats:/usr/bin/tegrastats
-
 
   # ZED 相機服務
   zed_packages:
@@ -122,7 +89,7 @@ services:
     runtime: nvidia
     tty: true
     stdin_open: true
-    command: bash -c "sleep infinity"
+    command: bash /scripts/zed_packages.sh
     environment:
       - ISAAC_ROS_PLATFORM=arm64-jetpack
       - ISAAC_ROS_WS=/workspace
@@ -132,8 +99,17 @@ services:
       - USER=ubuntu
       - DISPLAY=${DISPLAY:-:0}
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-36}
+      - SIMULATE_MODE=${SIMULATE_MODE:-false}
+      - APP_MODE=${APP_MODE:-auto_explore}
+      - ZED_CAMERA_MODEL=${ZED_CAMERA_MODEL:-zed2i}
+      - ENABLE_RVIZ=${ENABLE_RVIZ:-false}
+      - START_ZED_CAMERA=${START_ZED_CAMERA:-false}
+      - START_ZED_VISUALIZER=${START_ZED_VISUALIZER:-false}
+      - START_ZED_MAPPING=${START_ZED_MAPPING:-false}
     volumes:
       - /home/ubuntu/workspaces/main/zed_packages:/workspace
+      - /home/ubuntu/workspaces/main/object_detection_models:/models
+      - /home/ubuntu/workspaces/main/container_scripts:/scripts
       - /etc/localtime:/etc/localtime:ro
       - /tmp:/tmp
       - /tmp/.X11-unix:/tmp/.X11-unix

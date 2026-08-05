@@ -17,6 +17,22 @@
     object_detection:
       od_enabled: true # True to enable Object Detection
     ```
+#### 使用自訂義的 onnx file 進行 object detection
+1. 在 `object_detection_models/` 放入自己的 onnx file
+2. 修改 `zed_packages/src/zed-ros2-wrapper/zed_wrapper/config/custom_object_detection.yaml`
+    ```yaml
+    object_detection:
+      custom_onnx_file: '<YOUR_FILE_NAME>' # Path to the YOLO-like ONNX file for custom object detection directly performed by the ZED SDK
+      custom_onnx_input_size: 512 # Resolution used with the YOLO-like ONNX file. For example, 512 means a input tensor '1x3x512x512' 
+      
+      custom_class_count: 80 # Number of classes in the custom ONNX file. For example, 80 for YOLOv8 trained on COCO dataset
+    ```
+    * 如果 classname 有改的話也要改下面的相關內容
+3. 修改 `zed_packages/src/zed-ros2-wrapper/zed_wrapper/config/common_stereo.yaml`
+    ```yaml
+    object_detection:
+      detection_model: 'CUSTOM_YOLOLIKE_BOX_OBJECTS' # 'MULTI_CLASS_BOX_FAST', 'MULTI_CLASS_BOX_MEDIUM', 'MULTI_CLASS_BOX_ACCURATE', 'PERSON_HEAD_BOX_FAST', 'PERSON_HEAD_BOX_ACCURATE', 'CUSTOM_YOLOLIKE_BOX_OBJECTS'
+    ```
 
 ## Docker 佈署方式
 ### Docker Build
@@ -126,3 +142,6 @@ docker compose exec custom_packages bash -c "source /opt/ros/jazzy/setup.bash &&
   ```
 
 * **提示**：如果您想開啟或關閉 `Web 控制器`、`虛擬邊界` 或 `地圖整合` 等模組，請直接編輯根目錄下的 `.env` 檔案（例如修改 `ENABLE_WEB_CONTROLLER=true`），然後重新執行 `./scripts/docker_start.bash` 即可。
+
+docker compose run --no-deps --rm zed_packages bash
+ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zedx
