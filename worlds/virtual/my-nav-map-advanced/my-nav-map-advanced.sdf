@@ -1,0 +1,343 @@
+<?xml version="1.0" ?>
+<sdf version="1.8">
+  <world name="advanced_obstacle_world">
+
+    <!-- 物理與時序設定 -->
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <!-- 基礎系統插件 -->
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre</render_engine>
+    </plugin>
+
+    <!-- 光源 (Sun) -->
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- 地面 (Ground Plane) -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>40 40</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>40 40</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.6 0.6 0.6 1</ambient>
+            <diffuse>0.6 0.6 0.6 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ==================================================== -->
+    <!-- 1. 外圍邊界牆壁 (18m x 18m) -->
+    <!-- ==================================================== -->
+    <model name="outer_wall_north">
+      <static>true</static>
+      <pose>0 9 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>18.2 0.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>18.2 0.2 1.0</size></box></geometry><material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.4 0.4 0.4 1</diffuse></material></visual></link>
+    </model>
+
+    <model name="outer_wall_south">
+      <static>true</static>
+      <pose>0 -9 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>18.2 0.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>18.2 0.2 1.0</size></box></geometry><material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.4 0.4 0.4 1</diffuse></material></visual></link>
+    </model>
+
+    <model name="outer_wall_east">
+      <static>true</static>
+      <pose>9 0 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.2 18.0 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 18.0 1.0</size></box></geometry><material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.4 0.4 0.4 1</diffuse></material></visual></link>
+    </model>
+
+    <model name="outer_wall_west">
+      <static>true</static>
+      <pose>-9 0 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.2 18.0 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 18.0 1.0</size></box></geometry><material><ambient>0.2 0.2 0.2 1</ambient><diffuse>0.4 0.4 0.4 1</diffuse></material></visual></link>
+    </model>
+
+    <!-- ==================================================== -->
+    <!-- 2. 左上角區域：正方形障礙物 & 帶開口的凹字形房間 -->
+    <!-- ==================================================== -->
+    <!-- 獨立正方形 (約在 x=-5.5, y=6.5，大小 1.5m x 1.5m) -->
+    <model name="top_left_box">
+      <static>true</static>
+      <pose>-5.5 6.5 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>1.5 1.5 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>1.5 1.5 1.0</size></box></geometry><material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.7 0.4 0.2 1</diffuse></material></visual></link>
+    </model>
+
+    <!-- 凹字形隔間（帶門口）：拆解成北牆、南牆、西牆、東牆有開口 -->
+    <model name="room_west_north">
+      <static>true</static>
+      <pose>-7 3.5 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>3.5 0.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.5 0.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <model name="room_west_south">
+      <static>true</static>
+      <pose>-7 -0.5 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>3.5 0.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.5 0.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <model name="room_west_west">
+      <static>true</static>
+      <pose>-8.75 1.5 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.2 4.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 4.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <!-- 東側門口上方的短牆 -->
+    <model name="room_west_east_top">
+      <static>true</static>
+      <pose>-5.25 3.0 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.2 1.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <!-- 東側門口下方的短牆 -->
+    <model name="room_west_east_bottom">
+      <static>true</static>
+      <pose>-5.25 0.0 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.2 1.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <!-- ==================================================== -->
+    <!-- 3. 上方區域：柵欄式細柱與右上橫牆 -->
+    <!-- ==================================================== -->
+    <!-- 頂部四根垂直細柱 -->
+    <model name="top_post_1">
+      <static>true</static>
+      <pose>1.5 8.2 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.2 1.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <model name="top_post_2">
+      <static>true</static>
+      <pose>2.7 8.2 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.2 1.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <model name="top_post_3">
+      <static>true</static>
+      <pose>3.9 8.2 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.2 1.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <model name="top_post_4">
+      <static>true</static>
+      <pose>5.1 8.2 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.2 1.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 1.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <!-- 右上角靠牆橫板 (x=7.5, y=5.5，長 2.6m) -->
+    <model name="top_right_shelf">
+      <static>true</static>
+      <pose>7.7 5.5 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>2.6 0.4 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>2.6 0.4 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <!-- 中間偏左的四根方柱群 -->
+    <model name="mid_left_post_1">
+      <static>true</static>
+      <pose>-2.5 5.0 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.3 1.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.3 1.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <model name="mid_left_post_2">
+      <static>true</static>
+      <pose>0.0 5.0 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.3 1.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.3 1.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <model name="mid_left_post_3">
+      <static>true</static>
+      <pose>-2.5 2.5 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.3 1.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.3 1.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <model name="mid_left_post_4">
+      <static>true</static>
+      <pose>0.0 2.5 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.3 1.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.3 1.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <!-- ==================================================== -->
+    <!-- 4. 右側區域：雙圓弧障礙牆 (以半徑 2.5m 組裝) -->
+    <!-- ==================================================== -->
+    <!-- 右上方弧 (中心約在 x=5.0, y=2.5) -->
+    <model name="arc_top_right">
+      <static>true</static>
+      <pose>5.0 2.5 0.5 0 0 0</pose>
+      <link name="l">
+        <!-- 用多個包絡立方體拼接 0 到 120 度的弧線 -->
+        <collision name="c1"><pose>1.76 1.76 0 0 0 -0.78</pose><geometry><box><size>0.2 1.8 1.0</size></box></geometry></collision>
+        <visual name="v1"><pose>1.76 1.76 0 0 0 -0.78</pose><geometry><box><size>0.2 1.8 1.0</size></box></geometry></visual>
+        <collision name="c2"><pose>2.41 0.64 0 0 0 -0.26</pose><geometry><box><size>0.2 1.5 1.0</size></box></geometry></collision>
+        <visual name="v2"><pose>2.41 0.64 0 0 0 -0.26</pose><geometry><box><size>0.2 1.5 1.0</size></box></geometry></visual>
+        <collision name="c3"><pose>0.64 2.41 0 0 0 -1.31</pose><geometry><box><size>0.2 1.5 1.0</size></box></geometry></collision>
+        <visual name="v3"><pose>0.64 2.41 0 0 0 -1.31</pose><geometry><box><size>0.2 1.5 1.0</size></box></geometry></visual>
+      </link>
+    </model>
+
+    <!-- 左下方弧 (中心約在 x=5.0, y=2.5) -->
+    <model name="arc_bottom_left">
+      <static>true</static>
+      <pose>5.0 2.5 0.5 0 0 0</pose>
+      <link name="l">
+        <!-- 拼接 160 到 290 度的弧線 -->
+        <collision name="c1"><pose>-1.76 -1.76 0 0 0 -0.78</pose><geometry><box><size>0.2 1.8 1.0</size></box></geometry></collision>
+        <visual name="v1"><pose>-1.76 -1.76 0 0 0 -0.78</pose><geometry><box><size>0.2 1.8 1.0</size></box></geometry></visual>
+        <collision name="c2"><pose>-2.41 -0.2 0 0 0 0.1</pose><geometry><box><size>0.2 1.5 1.0</size></box></geometry></collision>
+        <visual name="v2"><pose>-2.41 -0.2 0 0 0 0.1</pose><geometry><box><size>0.2 1.5 1.0</size></box></geometry></visual>
+        <collision name="c3"><pose>-0.4 -2.41 0 0 0 1.4</pose><geometry><box><size>0.2 1.5 1.0</size></box></geometry></collision>
+        <visual name="v3"><pose>-0.4 -2.41 0 0 0 1.4</pose><geometry><box><size>0.2 1.5 1.0</size></box></geometry></visual>
+        <collision name="c4"><pose>1.3 -2.1 0 0 0 1.0</pose><geometry><box><size>0.2 1.2 1.0</size></box></geometry></collision>
+        <visual name="v4"><pose>1.3 -2.1 0 0 0 1.0</pose><geometry><box><size>0.2 1.2 1.0</size></box></geometry></visual>
+      </link>
+    </model>
+
+    <!-- ==================================================== -->
+    <!-- 5. 下方與右下區域：L型、直牆、長形通道 -->
+    <!-- ==================================================== -->
+    <!-- 中下 L 型牆壁 (底邊長 3.5m, 左邊高 4.5m) -->
+    <model name="mid_bottom_L_left">
+      <static>true</static>
+      <pose>0.2 -2.25 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.2 4.5 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 4.5 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <model name="mid_bottom_L_base">
+      <static>true</static>
+      <pose>1.85 -4.4 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>3.5 0.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.5 0.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <!-- L 型右邊的獨立直牆 (高 4.5m) -->
+    <model name="mid_bottom_straight">
+      <static>true</static>
+      <pose>4.2 -2.25 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.2 4.5 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 4.5 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <!-- 右下角大型 L 型狹窄通道 (底邊長 3m, 垂直高 7.5m 一路到底) -->
+    <model name="bottom_right_L_vertical">
+      <static>true</static>
+      <pose>6.5 -5.25 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>0.2 7.5 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>0.2 7.5 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <model name="bottom_right_L_base">
+      <static>true</static>
+      <pose>7.9 -1.6 0.5 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>3.0 0.2 1.0</size></box></geometry></collision>
+      <visual name="v"><geometry><box><size>3.0 0.2 1.0</size></box></geometry></visual></link>
+    </model>
+
+    <!-- ==================================================== -->
+    <!-- 6. 左下角區域：梅花座散落的六角形/圓柱障礙物群 -->
+    <!-- ==================================================== -->
+    <!-- 在雷達與導航用途中，高密度的多邊形多改以高精度圓柱體 (Cylinder) 取代，效果最穩定 -->
+    <model name="hex_1">
+      <static>true</static>
+      <pose>-5.5 -1.5 0.5 0 0 0</pose>
+      <link name="l">
+        <collision name="c"><geometry><cylinder><radius>0.5</radius><length>1.0</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.5</radius><length>1.0</length></cylinder></geometry></visual>
+      </link>
+    </model>
+
+    <model name="hex_2">
+      <static>true</static>
+      <pose>-7.0 -3.0 0.5 0 0 0</pose>
+      <link name="l">
+        <collision name="c"><geometry><cylinder><radius>0.5</radius><length>1.0</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.5</radius><length>1.0</length></cylinder></geometry></visual>
+      </link>
+    </model>
+
+    <model name="hex_3">
+      <static>true</static>
+      <pose>-4.0 -3.2 0.5 0 0 0</pose>
+      <link name="l">
+        <collision name="c"><geometry><cylinder><radius>0.5</radius><length>1.0</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.5</radius><length>1.0</length></cylinder></geometry></visual>
+      </link>
+    </model>
+
+    <model name="hex_4">
+      <static>true</static>
+      <pose>-5.5 -5.2 0.5 0 0 0</pose>
+      <link name="l">
+        <collision name="c"><geometry><cylinder><radius>0.5</radius><length>1.0</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.5</radius><length>1.0</length></cylinder></geometry></visual>
+      </link>
+    </model>
+
+    <model name="hex_5">
+      <static>true</static>
+      <pose>-2.6 -5.2 0.5 0 0 0</pose>
+      <link name="l">
+        <collision name="c"><geometry><cylinder><radius>0.5</radius><length>1.0</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.5</radius><length>1.0</length></cylinder></geometry></visual>
+      </link>
+    </model>
+
+    <model name="hex_6">
+      <static>true</static>
+      <pose>-7.5 -6.2 0.5 0 0 0</pose>
+      <link name="l">
+        <collision name="c"><geometry><cylinder><radius>0.5</radius><length>1.0</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.5</radius><length>1.0</length></cylinder></geometry></visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

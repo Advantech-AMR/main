@@ -115,7 +115,7 @@ docker compose exec custom_packages bash -c "source /opt/ros/jazzy/setup.bash &&
     ```bash
     ./scripts/docker_start.bash
     ```
-  * **啟動模擬器模式**（帶起 Gazebo 模擬器與 sim Profile）：
+  * **啟動模擬器模式**（帶起 Gazebo 模擬器）：
     ```bash
     ./scripts/docker_start.bash --sim
     ```

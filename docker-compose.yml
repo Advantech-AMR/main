@@ -14,14 +14,32 @@ services:
     runtime: nvidia
     tty: true
     stdin_open: true
-    # command: bash -c "source /opt/ros/jazzy/setup.bash && source /workspace/install/setup.bash && ros2 launch wheeltec_launch slam_with_navigation.launch.py"
+    command: |
+      bash -c "
+      source /opt/ros/jazzy/setup.bash
+      if [ -f /workspace/install/setup.bash ]; then source /workspace/install/setup.bash; fi
+      
+      if [ \"$$SIMULATE_MODE\" = \"true\" ]; then
+        echo 'Starting simulation mode in robot_base...'
+        ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False world:=/worlds/virtual/$$SIMULATE_WORLD_PATH/$$SIMULATE_WORLD_PATH.sdf &
+        sleep 5
+        ros2 launch slam_toolbox online_async_launch.py &
+      else
+        echo 'Starting physical mode in robot_base...'
+        ros2 launch wheeltec_launch slam_with_navigation.launch.py &
+      fi
+      wait
+      "
     environment:
       - USER=ubuntu
-      - DISPLAY=:0
-      - ROS_DOMAIN_ID=36
+      - DISPLAY=${DISPLAY:-:0}
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-36}
+      - SIMULATE_MODE=${SIMULATE_MODE:-false}
+      - SIMULATE_WORLD_PATH=${SIMULATE_WORLD_PATH:-demo_room_2}
       - ISAAC_ROS_WS=/workspace
     volumes:
       - /home/ubuntu/workspaces/main/robot_base:/workspace
+      - /home/ubuntu/workspaces/main/worlds:/worlds
       - /etc/localtime:/etc/localtime:ro
       - /tmp:/tmp
       - /tmp/.X11-unix:/tmp/.X11-unix
@@ -41,42 +59,51 @@ services:
     runtime: nvidia
     tty: true
     stdin_open: true
-    # command: |
-    #   bash -c "
-    #   source /opt/ros/jazzy/setup.bash
-    #   source /workspace/install/setup.bash
-    #   ros2 launch auto_explorer auto_exploration.launch.py &
+    command: |
+      bash -c "
+      source /opt/ros/jazzy/setup.bash
+      if [ -f /workspace/install/setup.bash ]; then source /workspace/install/setup.bash; fi
+      
+      USE_SIM_TIME_ARG=\"use_sim_time:=false\"
+      if [ \"$$SIMULATE_MODE\" = \"true\" ]; then
+        USE_SIM_TIME_ARG=\"use_sim_time:=true\"
+      fi
+      
+      ros2 launch auto_explorer auto_exploration.launch.py $$USE_SIM_TIME_ARG &
 
-    #   if [ \"$$ENABLE_WEB_CONTROLLER\" = \"true\" ]; then
-    #     echo 'Starting Web Controller...'
-    #     ros2 run wheeltec_web_teleop web_server &
-    #   fi
+      if [ \"$$ENABLE_WEB_CONTROLLER\" = \"true\" ]; then
+        echo 'Starting Web Controller...'
+        ros2 run wheeltec_web_teleop web_server &
+      fi
 
-    #   if [ \"$$ENABLE_CUSTOM_BOUNDARY\" = \"true\" ]; then
-    #     echo 'Starting Custom Boundary...'
-    #     ros2 run custom_boundary custom_boundary_node &
-    #   fi
+      if [ \"$$ENABLE_CUSTOM_BOUNDARY\" = \"true\" ]; then
+        echo 'Starting Custom Boundary...'
+        ros2 run custom_boundary custom_boundary_node &
+      fi
 
-    #   if [ \"$$ENABLE_MAP_INTEGRATION\" = \"true\" ]; then
-    #     echo 'Starting Map Integration...'
-    #     ros2 run map_integration map_integration_node &
-    #   fi
+      if [ \"$$ENABLE_MAP_INTEGRATION\" = \"true\" ]; then
+        echo 'Starting Map Integration...'
+        ros2 run map_integration map_integration_node &
+      fi
 
-    #   wait
-    #   "
+      wait
+      "
     environment:
       - ISAAC_ROS_PLATFORM=arm64-jetpack
       - ISAAC_ROS_WS=/workspace
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
       - USER=ubuntu
-      - DISPLAY=:0
-      - ROS_DOMAIN_ID=36
+      - DISPLAY=${DISPLAY:-:0}
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-36}
+      - SIMULATE_MODE=${SIMULATE_MODE:-false}
+      - SIMULATE_WORLD_PATH=${SIMULATE_WORLD_PATH:-demo_room_2}
       - ENABLE_WEB_CONTROLLER=${ENABLE_WEB_CONTROLLER:-false}
       - ENABLE_CUSTOM_BOUNDARY=${ENABLE_CUSTOM_BOUNDARY:-false}
       - ENABLE_MAP_INTEGRATION=${ENABLE_MAP_INTEGRATION:-false}
     volumes:
       - /home/ubuntu/workspaces/main/custom_packages:/workspace
+      - /home/ubuntu/workspaces/main/worlds:/worlds
       - /etc/localtime:/etc/localtime:ro
       - /tmp:/tmp
       - /tmp/.X11-unix:/tmp/.X11-unix
@@ -103,8 +130,8 @@ services:
       - NVIDIA_DRIVER_CAPABILITIES=all
       - LD_LIBRARY_PATH=/usr/local/zed/lib:/usr/local/cuda/lib64:/opt/ros/jazzy/share/gxf_isaac_optimizer/gxf/lib:/opt/ros/jazzy/opt/gz_math_vendor/lib
       - USER=ubuntu
-      - DISPLAY=:0
-      - ROS_DOMAIN_ID=36
+      - DISPLAY=${DISPLAY:-:0}
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-36}
     volumes:
       - /home/ubuntu/workspaces/main/zed_packages:/workspace
       - /etc/localtime:/etc/localtime:ro
@@ -126,17 +153,3 @@ services:
       - /dev/video1:/dev/video1
       - /dev/media0:/dev/media0
       - /dev/media1:/dev/media1
-
-
-  # 模擬器服務：加上 profiles 標籤
-  gazebo_sim:
-    profiles: ["sim"]  # <--- 只有在啟動時指定 sim profile 才會開啟
-    build:
-      context: .
-      dockerfile: Dockerfile.gazebo
-    network_mode: "host"
-    environment:
-      - DISPLAY=${DISPLAY:-:0}
-      - ROS_DOMAIN_ID=42
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw

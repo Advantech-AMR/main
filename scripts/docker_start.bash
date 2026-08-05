@@ -23,9 +23,16 @@ fi
 export ENABLE_WEB_CONTROLLER=${ENABLE_WEB_CONTROLLER:-false}
 export ENABLE_CUSTOM_BOUNDARY=${ENABLE_CUSTOM_BOUNDARY:-false}
 export ENABLE_MAP_INTEGRATION=${ENABLE_MAP_INTEGRATION:-false}
+export SIMULATE_MODE=${SIMULATE_MODE:-false}
+export SIMULATE_WORLD_PATH=${SIMULATE_WORLD_PATH:-}
 
 CMD="up"
 USE_SIM=false
+
+# Auto-enable simulation if SIMULATE_MODE is true in env
+if [ "$SIMULATE_MODE" = "true" ]; then
+  USE_SIM=true
+fi
 
 # Parse simple options
 for arg in "$@"; do
@@ -61,12 +68,13 @@ echo "----------------------------------------"
 
 # Run docker compose
 if [ "$USE_SIM" = true ]; then
-  echo "Starting services with simulator profile (sim)..."
-  docker compose --profile sim up -d
+  echo "Starting services in Simulation mode (Gazebo)..."
+  export SIMULATE_MODE="true"
 else
   echo "Starting core services (robot_base, custom_packages, zed_packages)..."
-  docker compose up -d
 fi
+
+docker compose up -d
 
 echo "----------------------------------------"
 echo "Services launched successfully! Run 'docker compose ps' to check status."

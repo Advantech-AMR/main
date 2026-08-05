@@ -59,6 +59,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-jazzy-isaac-ros-apriltag \
     ros-jazzy-isaac-ros-apriltag-interfaces
 
+# Install Gazebo simulation packages
+RUN apt-get install -y curl lsb-release gnupg xvfb
+RUN curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] https://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+RUN apt-get update && apt-get install -y gz-harmonic ros-jazzy-ros-gz
+
 # ========================================================================
 
 WORKDIR /workspace

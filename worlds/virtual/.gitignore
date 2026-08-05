@@ -1,0 +1,8 @@
+*
+!.gitignore
+!demo_room
+!my-nav-map
+!my-nav-map-advanced
+!demo_room/demo_room.sdf
+!my-nav-map/my-nav-map.sdf
+!my-nav-map-advanced/my-nav-map-advanced.sdf
