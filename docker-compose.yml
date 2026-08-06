@@ -20,6 +20,7 @@ services:
       - DISPLAY=${DISPLAY:-:0}
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-36}
       - SIMULATE_MODE=${SIMULATE_MODE:-false}
+      - ENABLE_FOXGLOVE=${ENABLE_FOXGLOVE:-false}
       - APP_MODE=${APP_MODE:-auto_explore}
       - WORLD_NAME=${WORLD_NAME:-my-nav-map}
       - MAP_PATH=${MAP_PATH:-/worlds/virtual/my-nav-map/maps/slam_map.yaml}

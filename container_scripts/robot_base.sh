@@ -4,6 +4,11 @@ if [ -f /workspace/install/setup.bash ]; then source /workspace/install/setup.ba
 
 HAS_PROCESS=false
 
+if [ "$ENABLE_FOXGLOVE" = "true" ]; then
+  echo "[custom_packages] Starting Foxglove..."
+  ros2 launch foxglove_bridge foxglove_bridge_launch.xml & 
+fi
+
 if [ "$APP_MODE" = "free" ]; then
   echo "[robot_base] Starting Free Mode..."
 
