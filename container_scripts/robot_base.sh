@@ -33,7 +33,7 @@ if [ "$APP_MODE" = "free" ]; then
     
     # 根據開關執行高階整合啟動，或獨立子節點
     if [ "$START_SLAM_TOOLBOX" = "true" ] && [ "$START_NAV2" = "true" ]; then
-      ros2 launch wheeltec_launch slam_with_navigation.launch.py &
+      ros2 launch wheeltec_launch slam_with_navigation.launch.py open_rviz:=False &
       HAS_PROCESS=true
     elif [ "$START_SLAM_TOOLBOX" = "true" ]; then
       ros2 launch wheeltec_launch slam.launch.py &
@@ -96,7 +96,7 @@ elif [ "$APP_MODE" = "slam" ] || [ "$APP_MODE" = "nav2" ] || [ "$APP_MODE" = "sl
       ros2 launch wheeltec_launch navigation.launch.py map:=$MAP_PATH
       
     elif [ "$APP_MODE" = "slam_nav2" ] || [ "$APP_MODE" = "auto_explore" ]; then
-      ros2 launch wheeltec_launch slam_with_navigation.launch.py
+      ros2 launch wheeltec_launch slam_with_navigation.launch.py open_rviz:=False
     fi
   fi
 

@@ -60,13 +60,13 @@ services:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
       - USER=ubuntu
+      - ENABLE_RVIZ=${ENABLE_RVIZ:-false}
+      - WORLD_NAME=${WORLD_NAME:-my-nav-map}
       - DISPLAY=${DISPLAY:-:0}
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-36}
       - SIMULATE_MODE=${SIMULATE_MODE:-false}
       - APP_MODE=${APP_MODE:-auto_explore}
       - ENABLE_WEB_CONTROLLER=${ENABLE_WEB_CONTROLLER:-false}
-      - ENABLE_CUSTOM_BOUNDARY=${ENABLE_CUSTOM_BOUNDARY:-false}
-      - ENABLE_MAP_INTEGRATION=${ENABLE_MAP_INTEGRATION:-false}
       - START_AUTO_EXPLORER=${START_AUTO_EXPLORER:-false}
     volumes:
       - /home/ubuntu/workspaces/main/custom_packages:/workspace

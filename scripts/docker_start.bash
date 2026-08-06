@@ -21,8 +21,6 @@ fi
 
 # Default environment values if not set
 export ENABLE_WEB_CONTROLLER=${ENABLE_WEB_CONTROLLER:-false}
-export ENABLE_CUSTOM_BOUNDARY=${ENABLE_CUSTOM_BOUNDARY:-false}
-export ENABLE_MAP_INTEGRATION=${ENABLE_MAP_INTEGRATION:-false}
 export SIMULATE_MODE=${SIMULATE_MODE:-false}
 export APP_MODE=${APP_MODE:-auto_explore}
 export WORLD_NAME=${WORLD_NAME:-my-nav-map}
@@ -93,8 +91,6 @@ if [ "$APP_MODE" = "free" ]; then
 fi
 echo "----------------------------------------"
 echo "  Web Controller:         $ENABLE_WEB_CONTROLLER"
-echo "  Custom Boundary:        $ENABLE_CUSTOM_BOUNDARY"
-echo "  Map Integration:        $ENABLE_MAP_INTEGRATION"
 echo "----------------------------------------"
 
 # Run docker compose
