@@ -33,6 +33,7 @@ services:
       - /home/ubuntu/workspaces/main/robot_base:/workspace
       - /home/ubuntu/workspaces/main/worlds:/worlds
       - /home/ubuntu/workspaces/main/container_scripts:/scripts
+      - /home/ubuntu/workspaces/main/rviz2_config:/rviz2_config
       - /etc/localtime:/etc/localtime:ro
       - /tmp:/tmp
       - /tmp/.X11-unix:/tmp/.X11-unix
@@ -71,6 +72,7 @@ services:
       - /home/ubuntu/workspaces/main/custom_packages:/workspace
       - /home/ubuntu/workspaces/main/worlds:/worlds
       - /home/ubuntu/workspaces/main/container_scripts:/scripts
+      - /home/ubuntu/workspaces/main/rviz2_config:/rviz2_config
       - /etc/localtime:/etc/localtime:ro
       - /tmp:/tmp
       - /tmp/.X11-unix:/tmp/.X11-unix
@@ -109,6 +111,7 @@ services:
       - /home/ubuntu/workspaces/main/zed_packages:/workspace
       - /home/ubuntu/workspaces/main/object_detection_models:/models
       - /home/ubuntu/workspaces/main/container_scripts:/scripts
+      - /home/ubuntu/workspaces/main/rviz2_config:/rviz2_config
       - /etc/localtime:/etc/localtime:ro
       - /tmp:/tmp
       - /tmp/.X11-unix:/tmp/.X11-unix

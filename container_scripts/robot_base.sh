@@ -105,8 +105,13 @@ elif [ "$APP_MODE" = "zed_detect" ] || [ "$APP_MODE" = "zed_mapping" ]; then
     echo "Error: ZED modes are physical only. Please set SIMULATE_MODE=false."
     exit 1
   fi
-  echo "[robot_base] ZED mode selected. Starting base serial control for physical robot..."
-  ros2 launch base_control_ros2 00_base_control.launch.py
+  if [ "$APP_MODE" = "zed_mapping" ]; then
+    echo "[robot_base] zed_mapping selected. Starting SLAM and Navigation..."
+    ros2 launch wheeltec_launch slam_with_navigation.launch.py open_rviz:=False
+  else
+    echo "[robot_base] zed_detect selected. Starting base serial control for physical robot..."
+    ros2 launch base_control_ros2 00_base_control.launch.py
+  fi
 else
   echo "Unknown APP_MODE: $APP_MODE. Sleep infinity..."
   sleep infinity
