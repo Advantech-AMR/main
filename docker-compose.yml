@@ -3,10 +3,7 @@ version: '3.8'
 services:
   # 核心服務：實體車與模擬器都需要的（Agent / Navigation）
   robot_base:
-    build:
-      context: .
-      dockerfile: Dockerfile.base
-    image: robot_base_img:latest
+    image: tseng91301497/main-workspace-compose:v1.0
     network_mode: "host"
     privileged: true
     ipc: "host"
@@ -44,7 +41,7 @@ services:
 
   # 自訂套件服務
   custom_packages:
-    image: robot_base_img:latest
+    image: tseng91301497/main-workspace-compose:v1.0
     depends_on:
       - robot_base
     network_mode: "host"
@@ -81,7 +78,7 @@ services:
 
   # ZED 相機服務
   zed_packages:
-    image: robot_base_img:latest
+    image: tseng91301497/main-workspace-compose:v1.0
     depends_on:
       - robot_base
     network_mode: "host"

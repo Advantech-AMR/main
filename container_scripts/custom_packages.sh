@@ -13,15 +13,12 @@ LAUNCHED_AUTO_EXPLORER=false
 if [ "$APP_MODE" = "auto_explore" ] || { [ "$APP_MODE" = "free" ] && [ "$START_AUTO_EXPLORER" = "true" ]; }; then
   echo "[custom_packages] Starting Auto Explorer..."
   ros2 launch auto_explorer auto_exploration.launch.py $USE_SIM_TIME_ARG &
-  echo "Enable Rviz2: $ENABLE_RVIZ"
-  if [ "$APP_MODE" = "auto_explore" ] && [ "$ENABLE_RVIZ" = "true" ]; then
-    echo "Starting Rviz2 with Auto Explorer profile..."
-    rviz2 -d /rviz2_config/auto_explorer.rviz &
-    # sleep 15
-    # ros2 topic pub -1 /exploration_control std_msgs/msg/String "{data: 'start'}"
-  fi
   LAUNCHED_AUTO_EXPLORER=true
   HAS_PROCESS=true
+  if [ "$SIMULATE_MODE" = "true" ]; then
+    sleep 15
+    ros2 topic pub -1 /exploration_control std_msgs/msg/String "{data: 'start'}"
+  fi
 fi
 
 if [ "$ENABLE_WEB_CONTROLLER" = "true" ]; then

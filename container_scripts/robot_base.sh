@@ -4,9 +4,12 @@ if [ -f /workspace/install/setup.bash ]; then source /workspace/install/setup.ba
 
 HAS_PROCESS=false
 
-if [ "$ENABLE_FOXGLOVE" = "true" ]; then
-  echo "[custom_packages] Starting Foxglove..."
-  ros2 launch foxglove_bridge foxglove_bridge_launch.xml & 
+# Start tools if enabled
+if [ -f /scripts/tools/foxglove.sh ]; then
+  source /scripts/tools/foxglove.sh
+fi
+if [ -f /scripts/tools/rviz2.sh ]; then
+  source /scripts/tools/rviz2.sh
 fi
 
 if [ "$APP_MODE" = "free" ]; then

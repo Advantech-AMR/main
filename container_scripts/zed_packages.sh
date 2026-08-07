@@ -31,8 +31,6 @@ if [ "$APP_MODE" = "free" ]; then
   fi
 
   if [ "$ENABLE_RVIZ" = "true" ]; then
-    echo "[zed_packages] Starting RViz2..."
-    rviz2 &
     HAS_PROCESS=true
   fi
 
@@ -52,8 +50,7 @@ elif [ "$APP_MODE" = "zed_detect" ]; then
   ros2 launch zed_wrapper zed_camera.launch.py camera_model:=$ZED_CAMERA_MODEL &
   
   if [ "$ENABLE_RVIZ" = "true" ]; then
-    echo "[zed_packages] Launching RViz2 and ZED Visualizer..."
-    rviz2 -d /rviz2_config/zed_detect.rviz &
+    echo "[zed_packages] Launching ZED Visualizer..."
     ros2 launch zed_obj_det_visualizer visualizer.launch.py &
   fi
   wait
@@ -67,10 +64,6 @@ elif [ "$APP_MODE" = "zed_mapping" ]; then
   ros2 launch zed_wrapper zed_camera.launch.py camera_model:=$ZED_CAMERA_MODEL &
   ros2 launch zed_obj_mapping mapping_all.launch.py &
   
-  if [ "$ENABLE_RVIZ" = "true" ]; then
-    echo "[zed_packages] Launching RViz2..."
-    rviz2 -d /rviz2_config/zed_obj_mapping_2d.rviz &
-  fi
   wait
   
 else
